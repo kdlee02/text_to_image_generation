@@ -38,3 +38,6 @@ class ImageGeneratorService:
     
     def get_all_images(self):
         return self.image_manager.get_images()
+    
+    def get_csv_log(self):
+        return self.image_manager.get_csv_log()

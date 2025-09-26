@@ -16,3 +16,7 @@ class ImageGeneratorRouter:
     def get_images(self):
         images = self.image_generator_service.get_all_images()
         return {'images': images}
+    
+    def get_csv_log(self):
+        csv_data = self.image_generator_service.get_csv_log()
+        return {'csv_data': csv_data}

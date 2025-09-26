@@ -44,6 +44,10 @@ async def generate_image(user_input: str = Body(..., embed=True)):
 async def get_images():
     return image_generator_router.get_images()
 
+@app.get("/api/get_csv_log")
+async def get_csv_log():
+    return image_generator_router.get_csv_log()
+
 import uvicorn
 
 if __name__ == "__main__":
