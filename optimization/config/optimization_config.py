@@ -14,6 +14,10 @@ HPSV2_WEIGHT = 0.5
 DSPY_MODEL = "solar-pro2"  # Can be changed to gpt-4 for better optimization
 DSPY_MAX_TOKENS = 1000
 
+IMAGE_SIZE = "square_hd"
+NUM_INFERENCE_STEPS = 50
+GUIDANCE_SCALE = 7.5
+
 # Optimization prompt template
 OPTIMIZATION_TEMPLATE = """
 You are an expert at optimizing prompts for AI image generation to achieve higher aesthetic and HPSv2 scores.
