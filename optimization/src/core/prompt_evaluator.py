@@ -3,8 +3,11 @@ Prompt evaluation module that combines image generation and scoring.
 """
 
 from typing import Dict
-from ..models.image_generator import ImageGenerator
-from ..models.evaluators import CombinedEvaluator
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from src.models.image_generator import ImageGenerator
+from src.models.evaluators import CombinedEvaluator
 
 
 class PromptEvaluator:

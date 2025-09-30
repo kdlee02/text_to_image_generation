@@ -3,9 +3,12 @@ Main optimization engine that orchestrates the iterative prompt optimization pro
 """
 
 from typing import Dict
-from .prompt_evaluator import PromptEvaluator
-from ..models.dspy_optimizer import DSPyManager
-from ...config.optimization_config import DEFAULT_ITERATIONS
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from src.core.prompt_evaluator import PromptEvaluator
+from src.models.dspy_optimizer import DSPyManager
+from config.optimization_config import DEFAULT_ITERATIONS
 
 
 class OptimizationEngine:

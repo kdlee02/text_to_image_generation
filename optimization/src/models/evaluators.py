@@ -6,7 +6,10 @@ import torch
 from PIL import Image
 from aesthetic_predictor_v2_5 import convert_v2_5_from_siglip
 import hpsv2
-from ...config.optimization_config import AESTHETIC_WEIGHT, HPSV2_WEIGHT
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from config.optimization_config import AESTHETIC_WEIGHT, HPSV2_WEIGHT
 
 
 class AestheticEvaluator:

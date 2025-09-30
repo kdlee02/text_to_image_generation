@@ -6,12 +6,22 @@ This script provides a clean interface to the prompt optimization system,
 using separate modules for image generation, evaluation, and optimization.
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add the optimization directory to Python path
+optimization_dir = Path(__file__).parent
+sys.path.insert(0, str(optimization_dir))
+
 from dotenv import load_dotenv
 from src.core.optimization_engine import OptimizationEngine
 from src.utils.utils import display_optimization_results, save_results_to_file
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from root directory
+root_dir = optimization_dir.parent.parent
+env_path = root_dir / '.env'
+load_dotenv(env_path)
 
 
 def optimize_prompt_iteratively(user_prompt: str, iterations: int = 5, api_key: str = None):

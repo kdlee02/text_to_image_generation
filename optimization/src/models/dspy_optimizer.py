@@ -4,7 +4,10 @@ DSPy-based prompt optimization module.
 
 import os
 import dspy
-from ...config.optimization_config import DSPY_MODEL
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from config.optimization_config import DSPY_MODEL
 
 
 class PromptOptimizer(dspy.Module):

@@ -10,7 +10,10 @@ from datetime import datetime
 from typing import Dict, Tuple
 from PIL import Image
 import tempfile
-from ...config.optimization_config import DEFAULT_MODEL
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from config.optimization_config import DEFAULT_MODEL, IMAGE_SIZE, NUM_INFERENCE_STEPS, GUIDANCE_SCALE
 
 
 class ImageGenerator:
@@ -31,7 +34,10 @@ class ImageGenerator:
             response = fal_client.run(
                 model,
                 arguments={
-                    "prompt": prompt
+                    "prompt": prompt,
+                    "image_size": IMAGE_SIZE,
+                    "num_inference_steps": NUM_INFERENCE_STEPS,
+                    "guidance_scale": GUIDANCE_SCALE
                 }
             )
 
