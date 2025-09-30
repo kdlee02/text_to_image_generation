@@ -35,14 +35,6 @@ class ImageManager:
                 image.save(buffered, format="JPEG")
                 return base64.b64encode(buffered.getvalue()).decode("utf-8")
             
-            # Handle Google format (legacy support)
-            elif hasattr(image_data, 'image') and hasattr(image_data.image, 'image_bytes'):
-                image_bytes = image_data.image.image_bytes
-                image = Image.open(BytesIO(image_bytes))
-                buffered = BytesIO()
-                image.save(buffered, format="JPEG")
-                return base64.b64encode(buffered.getvalue()).decode("utf-8")
-            
             else:
                 raise ValueError("Unsupported image data format")
                 
