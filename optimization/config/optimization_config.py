@@ -11,7 +11,7 @@ AESTHETIC_WEIGHT = 0.5
 HPSV2_WEIGHT = 0.5
 
 # DSPy optimization settings
-DSPY_MODEL = "solar-pro2"  # Can be changed to gpt-4 for better optimization
+DSPY_MODEL = "solar-pro2"  # Upstage Solar Pro 2 model
 DSPY_MAX_TOKENS = 1000
 
 IMAGE_SIZE = "square_hd"

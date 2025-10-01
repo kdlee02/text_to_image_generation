@@ -16,33 +16,32 @@ class PromptOptimizer(dspy.Module):
     def __init__(self):
         super().__init__()
         self.optimize_prompt = dspy.ChainOfThought(
-            "original_prompt, current_score, feedback -> optimized_prompt"
+            "prompt_to_optimize -> optimized_prompt"
         )
     
     def forward(self, original_prompt: str, current_score: float, feedback: str = "") -> str:
-        """Optimize a prompt based on current performance."""
-        optimization_context = f"""
-        You are an expert at optimizing prompts for AI image generation to achieve higher aesthetic and HPSv2 scores.
-        
-        Original prompt: {original_prompt}
-        Current combined score: {current_score:.2f}
-        Feedback: {feedback}
-        
-        Guidelines for optimization:
-        1. Keep the core concept but enhance visual details
-        2. Maintain coherence and avoid contradictory terms
-        3. Keep the prompt concise but descriptive
-        
-        Generate an improved version of the prompt that will likely achieve higher aesthetic and HPSv2 scores.
-        """
-        
-        result = self.optimize_prompt(
-            original_prompt=original_prompt,
-            current_score=current_score,
-            feedback=optimization_context
-        )
-        
-        return result.optimized_prompt
+        """Optimize a prompt based on current performance and feedback."""
+
+        optimization_prompt = f"""Enhance this image generation prompt to achieve higher aesthetic and HPSv2 scores.
+
+    Original prompt: {original_prompt}
+    Current score: {current_score:.2f}/10
+
+    Feedback from last attempt: {feedback}
+
+    Enhancement instructions:
+    - Keep the core concept but add visual details
+    - Include artistic style terms: "highly detailed", "professional photography", "award-winning"
+    - Add lighting terms: "dramatic lighting", "perfect lighting", "golden hour"
+    - Add composition terms: "perfect composition", "rule of thirds"
+    - Add quality terms: "8k resolution", "masterpiece", "trending on artstation"
+    - Keep it concise but descriptive
+
+    Enhanced prompt:"""
+
+        result = self.optimize_prompt(prompt_to_optimize=optimization_prompt)
+        optimized = result.optimized_prompt.strip()
+        return optimized
 
 
 class DSPyManager:
@@ -61,7 +60,9 @@ class DSPyManager:
                 print("⚠️ Warning: OPENAI_API_KEY not found. DSPy optimization will be disabled.")
                 return False
             
-            lm = dspy.OpenAI(model=DSPY_MODEL, api_key=openai_api_key)
+            # Use the correct DSPy LM configuration for Upstage Solar Pro 2
+            # DSPy uses LiteLLM under the hood, so we can specify the model directly
+            lm = dspy.LM(model=DSPY_MODEL, api_key=openai_api_key)
             dspy.configure(lm=lm)
             print("✅ DSPy configured successfully!")
             return True
