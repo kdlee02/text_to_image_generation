@@ -19,7 +19,7 @@ function generateImage() {
 
     loadingMessage.style.display = 'block';
     generateButton.style.display = 'none';
-    imageContainer.innerHTML = '';
+    // imageContainer.innerHTML = '';
 
     fetch('/api/generate_image', {
         method: 'POST',
