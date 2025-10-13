@@ -11,6 +11,36 @@ from models.image_manager import ImageManager
 from models.prompt_manager import PromptManager
 load_dotenv()
 
+class ImageEvaluationSignature(dspy.Signature):
+    """Analyze a generated image against the desired prompt and provide detailed evaluation.
+    
+    Evaluate each component (subject, art type, art style, art movement) for accuracy.
+    Identify any conflicting elements that should not coexist. If conflicts exist, focus on the subject and art style first.
+    Provide specific, actionable feedback for improvements.
+    If issues are found, generate a revised prompt that addresses them precisely.
+    """
+    
+    desired_prompt: str = dspy.InputField(desc="The original prompt the user wanted")
+    current_image: dspy.Image = dspy.InputField(desc="The generated image to evaluate")
+    current_prompt: str = dspy.InputField(desc="The prompt used to generate this image")
+    previous_attempts: str = dspy.InputField(desc="History of previous attempts and feedback")
+    
+    reasoning: str = dspy.OutputField(desc="Step-by-step analysis of the image")
+    overall_prompt_match: bool = dspy.OutputField(desc="Does the image match the overall intent?")
+    subject_match: bool = dspy.OutputField(desc="Is the main subject correct?")
+    art_type_match: bool = dspy.OutputField(desc="Is the art type/medium correct?")
+    art_style_match: bool = dspy.OutputField(desc="Is the artistic style correct?")
+    art_movement_match: bool = dspy.OutputField(desc="Is the art movement/period correct?")
+    has_conflicting_elements: bool = dspy.OutputField(desc="Are there contradictory elements?")
+    
+    conflict_description: str = dspy.OutputField(desc="Describe any conflicting elements found")
+    overall_prompt_match_feedback: str = dspy.OutputField(desc="Feedback on overall match")
+    subject_feedback: str = dspy.OutputField(desc="Specific feedback on the subject")
+    art_type_feedback: str = dspy.OutputField(desc="Specific feedback on art type")
+    art_style_feedback: str = dspy.OutputField(desc="Specific feedback on art style")
+    art_movement_feedback: str = dspy.OutputField(desc="Specific feedback on art movement")
+    revised_prompt: str = dspy.OutputField(desc="Improved prompt addressing identified issues")
+    overall_score: int = dspy.OutputField(desc="Overall Score between 1 to 10 where 10 means perfect")
 class ImageGeneratorService:
     def __init__(self):
         self.image_manager = ImageManager()
@@ -35,56 +65,38 @@ class ImageGeneratorService:
 
         result = fal_client.result("fal-ai/imagen4/preview", request_id)
         url = result["images"][0]["url"]
-        self.image_manager.add_image(prompt, result["images"][0])
-        return dspy.Image.from_url(url), url
+        # Don't call add_image here - return image_data for later logging
+        return dspy.Image.from_url(url), url, result["images"][0]
 
     def dspy_opt(self, user_input):
         user_input = PromptManager.format_prompt(user_input)
         initial_prompt = user_input
         current_prompt = initial_prompt
 
-        check_and_revise_prompt = dspy.ChainOfThought("""
-        desired_prompt: str, 
-        current_image: dspy.Image, 
-        current_prompt: str,
-        previous_attempts: str -> 
-        reasoning: str,
-
-        overall_prompt_match: bool,
-        subject_match: bool,
-        art_type_match: bool,
-        art_style_match: bool,
-        art_movement_match: bool,
-
-        has_conflicting_elements: bool,
-        conflict_description: str,
-
-        overall_prompt_match_feedback: str,
-        subject_feedback: str,
-        art_type_feedback: str,
-        art_style_feedback: str,
-        art_movement_feedback: str,
-        revised_prompt: str
-        """)
+        check_and_revise_prompt = dspy.ChainOfThought(ImageEvaluationSignature)
 
         history = []
 
         url = ''
         
         for i in range(5):
-            current_image, url = self.generate_image(current_prompt)
+            current_image, url, image_data = self.generate_image(current_prompt)
             #display_image(current_image)
             #print(f'current prompt: {current_prompt}')
-            # Format history for context
-            history_str = "\n".join([
-            f"Attempt {idx+1}: {h['prompt']}\n" +
-            f"  Subject: {h['detailed_feedback']['subject']}\n" +
-            f"  Art Type: {h['detailed_feedback']['art_type']}\n" +
-            f"  Style: {h['detailed_feedback']['style']}\n" +
-            f"  Art Movement: {h['detailed_feedback']['art_movement']}\n" +
-            f"  Conflicts: {h['detailed_feedback']['conflicts']}"
-            for idx, h in enumerate(history)
-        ]) if history else "No previous attempts"
+            # Format only the last attempt for context (more focused feedback)
+            if history:
+                last_attempt = history[-1]
+                history_str = (
+                    f"Previous attempt:\n"
+                    f"Prompt: {last_attempt['prompt']}\n"
+                    f"Subject: {last_attempt['detailed_feedback']['subject']}\n"
+                    f"Art Type: {last_attempt['detailed_feedback']['art_type']}\n"
+                    f"Style: {last_attempt['detailed_feedback']['style']}\n"
+                    f"Art Movement: {last_attempt['detailed_feedback']['art_movement']}\n"
+                    f"Conflicts: {last_attempt['detailed_feedback']['conflicts']}"
+                )
+            else:
+                history_str = "No previous attempts"
 
             result = check_and_revise_prompt(
                 desired_prompt=initial_prompt, 
@@ -92,6 +104,9 @@ class ImageGeneratorService:
                 current_prompt=current_prompt,
                 previous_attempts=history_str
             )
+            
+            # Log image with DSPy evaluation data
+            self.image_manager.add_image(current_prompt, image_data, result)
             # Store this attempt
             history.append({
                 'prompt': current_prompt,
@@ -113,6 +128,7 @@ class ImageGeneratorService:
                 print(f"Art Movement - {result.art_movement_feedback}")
                 print(f"Overall Prompt - {result.overall_prompt_match_feedback}")
                 print(f"Confliction:- {result.conflict_description}")
+                print(f"Confliction:- {result.overall_score}")
                 response = requests.get(url)
                 response.raise_for_status()
                 image = Image.open(BytesIO(response.content))
@@ -127,6 +143,7 @@ class ImageGeneratorService:
                 print(f"Overall Prompt Match: {'✓' if result.overall_prompt_match else '✗'} - {result.overall_prompt_match_feedback}")
                 print(f"Confliction: {'✓' if not result.has_conflicting_elements else '✗'} - {result.conflict_description}")
                 print(f"\nRevised prompt: {result.revised_prompt}")
+                print(f"Confliction: {result.overall_score}")
                 current_prompt = result.revised_prompt
                 
         response = requests.get(url)
