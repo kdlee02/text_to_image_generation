@@ -18,12 +18,12 @@ function generateImage() {
 
     loadingMessage.style.display = 'block';
     generateButton.style.display = 'none';
-    // imageContainer.innerHTML = '';
+    imageContainer.innerHTML = '';
 
     fetch('/api/generate_image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_input: promptInput})
+        body: JSON.stringify({ user_input: promptInput })
     })
         .then(response => response.json())
         .then(data => {
@@ -69,6 +69,9 @@ function fetchHistory() {
             }
 
             console.log('Number of images:', data.images.length);
+
+            // Reverse array to show newest images first
+            data.images.reverse();
 
             data.images.forEach((image, index) => {
                 console.log(`Processing image ${index}:`, image);
