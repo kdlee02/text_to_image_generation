@@ -21,7 +21,13 @@ class ImageManager:
         if not os.path.exists(self.csv_file):
             with open(self.csv_file, 'w', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
-                writer.writerow(['timestamp', 'image_id', 'prompt', 'image_url', 'local_filename', 'width', 'height'])
+                writer.writerow([
+                    'timestamp', 'image_id', 'original_user_prompt', 'prompt', 'image_url', 'local_filename', 'width', 'height',
+                    'subject_match', 'art_type_match', 'art_style_match', 'art_movement_match', 
+                    'overall_prompt_match', 'has_conflicting_elements',
+                    'subject_feedback', 'art_type_feedback', 'art_style_feedback', 'art_movement_feedback',
+                    'overall_feedback', 'conflict_description','overall_score'
+                ])
         
     def image_to_base64(self, image_data):
         """Convert image data to base64. Handles both Google and Fal AI formats."""
@@ -41,7 +47,7 @@ class ImageManager:
         except Exception as e:
             raise RuntimeError(f"Error processing image: {str(e)}")
         
-    def add_image(self, prompt, image_data):
+    def add_image(self, prompt, image_data, dspy_result=None, original_user_prompt=None):
         image_base64 = self.image_to_base64(image_data)
         
         # Extract additional metadata from Fal AI response
@@ -83,6 +89,21 @@ class ImageManager:
             print(f"Warning: Could not save image file: {str(e)}")
             filename = ""  # Clear filename if save failed
         
+        # Extract DSPy evaluation data if provided
+        subject_match = dspy_result.subject_match if dspy_result else None
+        art_type_match = dspy_result.art_type_match if dspy_result else None
+        art_style_match = dspy_result.art_style_match if dspy_result else None
+        art_movement_match = dspy_result.art_movement_match if dspy_result else None
+        overall_prompt_match = dspy_result.overall_prompt_match if dspy_result else None
+        has_conflicting_elements = dspy_result.has_conflicting_elements if dspy_result else None
+        
+        subject_feedback = dspy_result.subject_feedback if dspy_result else None
+        art_type_feedback = dspy_result.art_type_feedback if dspy_result else None
+        art_style_feedback = dspy_result.art_style_feedback if dspy_result else None
+        art_movement_feedback = dspy_result.art_movement_feedback if dspy_result else None
+        overall_feedback = dspy_result.overall_prompt_match_feedback if dspy_result else None
+        conflict_description = dspy_result.conflict_description if dspy_result else None
+        overall_score = dspy_result.overall_score if dspy_result else None
         # Log to CSV
         try:
             with open(self.csv_file, 'a', newline='', encoding='utf-8') as file:
@@ -90,11 +111,25 @@ class ImageManager:
                 writer.writerow([
                     datetime.now().isoformat(),
                     image_id,
+                    original_user_prompt,
                     prompt,
                     image_url,
                     filename,
                     width,
-                    height
+                    height,
+                    subject_match,
+                    art_type_match,
+                    art_style_match,
+                    art_movement_match,
+                    overall_prompt_match,
+                    has_conflicting_elements,
+                    subject_feedback,
+                    art_type_feedback,
+                    art_style_feedback,
+                    art_movement_feedback,
+                    overall_feedback,
+                    conflict_description,
+                    overall_score
                 ])
         except Exception as e:
             print(f"Warning: Could not write to CSV log: {str(e)}")
