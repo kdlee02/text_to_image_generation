@@ -139,7 +139,14 @@ class ImageManager:
             "prompt": prompt, 
             "image_base64": image_base64,
             "metadata": metadata,
-            "local_filename": filename
+            "local_filename": filename,
+            "subject_feedback": subject_feedback,
+            "art_type_feedback": art_type_feedback,
+            "art_style_feedback": art_style_feedback,
+            "art_movement_feedback": art_movement_feedback,
+            "overall_feedback": overall_feedback,
+            "conflict_description": conflict_description,
+            "overall_score": overall_score
         }
         self.images.append(image_entry)
         return image_base64

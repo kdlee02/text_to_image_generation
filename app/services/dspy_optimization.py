@@ -128,7 +128,7 @@ class ImageGeneratorService:
                 print(f"Art Movement - {result.art_movement_feedback}")
                 print(f"Overall Prompt - {result.overall_prompt_match_feedback}")
                 print(f"Confliction:- {result.conflict_description}")
-                print(f"Confliction:- {result.overall_score}")
+                print(f"Overall Score:- {result.overall_score}")
                 response = requests.get(url)
                 response.raise_for_status()
                 image = Image.open(BytesIO(response.content))
@@ -143,7 +143,7 @@ class ImageGeneratorService:
                 print(f"Overall Prompt Match: {'✓' if result.overall_prompt_match else '✗'} - {result.overall_prompt_match_feedback}")
                 print(f"Confliction: {'✓' if not result.has_conflicting_elements else '✗'} - {result.conflict_description}")
                 print(f"\nRevised prompt: {result.revised_prompt}")
-                print(f"Confliction: {result.overall_score}")
+                print(f"Overall Score: {result.overall_score}")
                 current_prompt = result.revised_prompt
                 
         response = requests.get(url)

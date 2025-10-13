@@ -13,8 +13,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Set up templates
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-# Set up static files
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+# Set up static files with no-cache headers for development
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+class NoCacheStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+app.mount("/static", NoCacheStaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 # Create router instance
 image_generator_router = ImageGeneratorRouter()
