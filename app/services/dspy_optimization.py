@@ -106,7 +106,7 @@ class ImageGeneratorService:
             )
             
             # Log image with DSPy evaluation data
-            self.image_manager.add_image(current_prompt, image_data, result)
+            self.image_manager.add_image(current_prompt, image_data, result, user_input)
             # Store this attempt
             history.append({
                 'prompt': current_prompt,

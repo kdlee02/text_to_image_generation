@@ -22,7 +22,7 @@ class ImageManager:
             with open(self.csv_file, 'w', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
                 writer.writerow([
-                    'timestamp', 'image_id', 'prompt', 'image_url', 'local_filename', 'width', 'height',
+                    'timestamp', 'image_id', 'original_user_prompt', 'prompt', 'image_url', 'local_filename', 'width', 'height',
                     'subject_match', 'art_type_match', 'art_style_match', 'art_movement_match', 
                     'overall_prompt_match', 'has_conflicting_elements',
                     'subject_feedback', 'art_type_feedback', 'art_style_feedback', 'art_movement_feedback',
@@ -47,7 +47,7 @@ class ImageManager:
         except Exception as e:
             raise RuntimeError(f"Error processing image: {str(e)}")
         
-    def add_image(self, prompt, image_data, dspy_result=None):
+    def add_image(self, prompt, image_data, dspy_result=None, original_user_prompt=None):
         image_base64 = self.image_to_base64(image_data)
         
         # Extract additional metadata from Fal AI response
@@ -111,6 +111,7 @@ class ImageManager:
                 writer.writerow([
                     datetime.now().isoformat(),
                     image_id,
+                    original_user_prompt,
                     prompt,
                     image_url,
                     filename,
