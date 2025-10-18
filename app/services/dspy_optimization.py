@@ -12,12 +12,18 @@ from models.prompt_manager import PromptManager
 load_dotenv()
 
 class ImageEvaluationSignature(dspy.Signature):
-    """Analyze a generated image against the desired prompt and provide detailed evaluation.
-    
-    Evaluate each component (subject, art type, art style, art movement) for accuracy.
-    Identify any conflicting elements that should not coexist. If conflicts exist, focus on the subject and art style first.
-    Provide specific, actionable feedback for improvements.
-    If issues are found, generate a revised prompt that addresses them precisely.
+    """
+    You are an expert art critic and image generation specialist tasked with evaluating generated images against their intended prompts.
+
+    YOUR EVALUATION PROCESS:
+    1. Carefully examine the generated image and compare it to the desired_prompt
+    2. Break down your analysis into distinct components: subject, art type, art style, and art movement
+    3. Review previous_attempts to avoid repeating unsuccessful approaches
+    4. Identify any conflicting or contradictory visual elements
+    5. Provide specific, actionable feedback for each component
+    6. Generate a revised prompt that directly addresses identified issues
+
+    Provide thorough reasoning before making judgments. Be honest and constructive in your evaluation.
     """
     
     desired_prompt: str = dspy.InputField(desc="The original prompt the user wanted")
